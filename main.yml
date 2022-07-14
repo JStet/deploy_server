@@ -1,0 +1,64 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: no
+  vars_files:
+    - vars/main.yml
+    - vars/vault.yml
+  tasks:
+    # - block:
+    #   - name: Initial server setup (security etc.)
+    #     include_role:
+    #       name: jstet.initial_server_setup
+    #     vars:
+    #       extra_packages: 
+    #           - htop
+    #           - vim
+    #           - apt-transport-https
+    #           - ca-certificates
+    #           - curl
+    #           - software-properties-common
+    #           - python3-pip
+    #           - virtualenv
+    #           - python3-setuptools
+    #       services:
+    #         - name: http
+    #           port: 80
+    #           protocols:
+    #             - tcp
+    #             - udp
+    #         - name: https
+    #           port: 443
+    #           protocols:
+    #             - tcp
+    #             - udp
+    #   become: yes
+
+
+    # - name: Installing Docker
+    #   become: true
+    #   import_tasks: tasks/docker_install.yml
+
+    # /etc/docker/daemon.json
+    # {
+    #   "iptables": false
+    # }
+
+    - name: Create a network
+      become: true
+      community.docker.docker_network:
+        name: nginx-proxy
+    
+    - name: Installing nginx-proxy 
+      become: true
+      community.docker.docker_container:
+        name: nginx-proxy
+        networks:
+          - name: nginx-proxy
+        volumes: /var/run/docker.sock:/tmp/docker.sock
+        image: jwilder/nginx-proxy
+
+    
+        
+    
+

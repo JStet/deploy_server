@@ -1,2 +1,4 @@
 ---
 CERTBOT_MAIL_ADRESS: konstanz@correlaid.com
+apps:
+  - homepage

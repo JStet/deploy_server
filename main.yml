@@ -1,17 +1,17 @@
 ---
 - hosts: all
-  gather_facts: yes
+  gather_facts: no
   become: no
   vars_files:
     - vars/main.yml
     - vars/vault.yml
   tasks:
     # - block:
-    #   - name: Initial server setup (security etc.)
-    #     include_role:
-    #       name: jstet.initial_server_setup
-    #     vars:
-    #       extra_packages: 
+    #     - name: Initial server setup (security etc.)
+    #       include_role:
+    #         name: jstet.initial_server_setup
+    #       vars:
+    #         extra_packages:
     #           - htop
     #           - vim
     #           - apt-transport-https
@@ -21,44 +21,62 @@
     #           - python3-pip
     #           - virtualenv
     #           - python3-setuptools
-    #       services:
-    #         - name: http
-    #           port: 80
-    #           protocols:
-    #             - tcp
-    #             - udp
-    #         - name: https
-    #           port: 443
-    #           protocols:
-    #             - tcp
-    #             - udp
+    #           - git
+    #         services:
+    #           - name: http
+    #             port: 80
+    #             protocols:
+    #               - tcp
+    #               - udp
+    #           - name: https
+    #             port: 443
+    #             protocols:
+    #               - tcp
+    #               - udp
     #   become: yes
-
 
     # - name: Installing Docker
     #   become: true
     #   import_tasks: tasks/docker_install.yml
 
-    # /etc/docker/daemon.json
-    # {
-    #   "iptables": false
-    # }
+    # - name: configuring git
+    #   shell: | 
+    #     git config --global user.name {{github_account}}
+    #     git config --global user.email {{github_email}}
 
-    - name: Create a network
-      become: true
-      community.docker.docker_network:
-        name: nginx-proxy
-    
-    - name: Installing nginx-proxy 
-      become: true
-      community.docker.docker_container:
-        name: nginx-proxy
-        networks:
-          - name: nginx-proxy
-        volumes: /var/run/docker.sock:/tmp/docker.sock
-        image: jwilder/nginx-proxy
+    # - name: Create deploy key 
+    #   shell: | 
+    #     yes 'y' | ssh-keygen -o -a 100 -t ed25519 -C  {{  github_email  }} -f /home/user/.ssh/id_rsa -N ''
 
-    
-        
-    
+    # - name: add key to authorized keys
+    #   shell: |
+    #     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys 
 
+    # - name: save ssh_key to local file
+    #   command: cat ~/.ssh/id_rsa
+    #   register: result
+
+    # - local_action: copy content={{ result }} dest=output/key.txt
+
+    # - name: Create a network
+    #   become: true
+    #   community.docker.docker_network:
+    #     name: nginx-proxy
+
+    # - name: Installing nginx-proxy
+    #   become: yes
+    #   community.docker.docker_container:
+    #     name: nginx-proxy
+    #     networks:
+    #       - name: nginx-proxy
+    #     volumes: /var/run/docker.sock:/tmp/docker.sock
+    #     image: jwilder/nginx-proxy
+
+    # - name: cloning repo
+    #   shell: | 
+    #     yes 'y' | git clone https://github.com/JStet/homepage.git
+    #   ignore_errors: yes
+    
+    - name: docker compose
+      shell: |
+        cd homepage && docker compose up -d
